@@ -5,10 +5,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-queue-cure-2026-secret-key'
 
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
-
+DEBUG = False
+ALLOWED_HOSTS = [".onrender.com"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -61,11 +59,11 @@ ASGI_APPLICATION = 'queue_cure.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'queue_cure',
-        'USER': 'root',
-        'PASSWORD': 'root123',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
