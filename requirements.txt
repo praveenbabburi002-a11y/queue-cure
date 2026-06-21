@@ -1,0 +1,5 @@
+Django
+djangorestframework
+channels
+gunicorn
+mysqlclient
