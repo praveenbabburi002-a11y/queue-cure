@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if settings.clinic_name %}{{ settings.clinic_name }}{% else %}Queue Cure{% endif %} — Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--sw:240px;--navy:#0d1b2a;--navy2:#1b2d42;--accent:#2563eb;--accent2:#1d4ed8;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--slate:#64748b;--bg:#f0f4f8;--white:#fff;--cr:16px;--sh:0 4px 24px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:#1e293b;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--navy);display:flex;flex-direction:column;z-index:100;padding:0 0 24px}
+.sb-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.sb-mark{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:4px}
+.sb-name{font-size:20px;font-weight:800;color:#fff}.sb-name span{color:#60a5fa}
+.nav-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:14px 20px 6px}
+.nav-a{display:flex;align-items:center;gap:10px;padding:10px 20px;margin:1px 8px;border-radius:10px;color:rgba(255,255,255,.6);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s}
+.nav-a:hover,.nav-a.active{background:rgba(255,255,255,.08);color:#fff}
+.nav-a .ic{font-size:16px;width:20px;text-align:center}
+.sb-foot{margin-top:auto;padding:0 8px;border-top:1px solid rgba(255,255,255,.08);padding-top:16px}
+.main{margin-left:var(--sw);min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--white);border-bottom:1px solid #e2e8f0;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:90}
+.pg-title{font-size:18px;font-weight:700;color:var(--navy)}
+.q-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600}
+.q-badge.on{background:#dcfce7;color:#15803d}.q-badge.off{background:#fef9c3;color:#92400e}
+.q-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.content{padding:24px 28px;flex:1}
+.hero{background:linear-gradient(135deg,var(--accent) 0%,#1e3a8a 100%);border-radius:var(--cr);padding:28px 32px;color:#fff;margin-bottom:24px;display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center;box-shadow:0 8px 32px rgba(37,99,235,.3)}
+.hero-token{font-family:'JetBrains Mono',monospace;font-size:72px;font-weight:700;line-height:1}
+.hero-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.6;margin-bottom:6px}
+.hero-name{font-size:24px;font-weight:700;margin-bottom:4px}.hero-type{font-size:14px;opacity:.8}
+.hero-actions{display:flex;flex-direction:column;gap:10px}
+.btn-call{background:#fff;color:var(--accent2);border:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.15);text-decoration:none;display:inline-block;text-align:center}
+.btn-call:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.2);color:var(--accent2)}
+.hero-empty{grid-column:1/-1;text-align:center;padding:12px 0;font-size:15px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--white);border-radius:var(--cr);padding:20px 22px;box-shadow:var(--sh);display:flex;align-items:center;gap:16px}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.si-blue{background:#dbeafe}.si-green{background:#d1fae5}.si-amber{background:#fef3c7}.si-red{background:#fee2e2}
+.stat-val{font-size:28px;font-weight:800;line-height:1;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.stat-lbl{font-size:12px;color:var(--slate);font-weight:500}
+.em-bar{background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:12px;margin-bottom:20px;animation:pb 2s ease-in-out infinite}
+@keyframes pb{0%,100%{border-color:#fecaca}50%{border-color:#ef4444}}
+.panel{background:var(--white);border-radius:var(--cr);box-shadow:var(--sh);overflow:hidden;margin-bottom:24px}
+.panel-head{padding:18px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:15px;font-weight:700;color:var(--navy)}
+.act-bar{display:flex;gap:8px;flex-wrap:wrap;padding:14px 24px;border-bottom:1px solid #f1f5f9}
+.btn-sm{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-pause{background:#fef9c3;color:#854d0e}.btn-pause:hover{background:#fef08a}
+.btn-resume{background:#dcfce7;color:#14532d}.btn-resume:hover{background:#bbf7d0}
+.btn-add{background:var(--accent);color:#fff}.btn-add:hover{background:var(--accent2);color:#fff}
+table{width:100%;border-collapse:collapse}
+thead tr{background:#f8fafc}
+th{padding:10px 16px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--slate);text-align:left;border-bottom:1px solid #e2e8f0}
+td{padding:11px 16px;font-size:14px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.tok{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;background:#eff6ff;color:var(--accent);padding:3px 8px;border-radius:6px}
+.pbadge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase}
+.pe{background:#fee2e2;color:#b91c1c}.pu{background:#fef3c7;color:#92400e}.pn{background:#f1f5f9;color:#475569}
+.eta-chip{font-size:12px;font-weight:600;color:var(--slate);background:#f8fafc;padding:2px 8px;border-radius:6px}
+.row-acts{display:flex;gap:5px;flex-wrap:wrap}
+.btn-t{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .12s;text-decoration:none;display:inline-block}
+.bt-done{background:#d1fae5;color:#065f46}.bt-done:hover{background:#a7f3d0}
+.bt-skip{background:#f1f5f9;color:#475569}.bt-skip:hover{background:#e2e8f0}
+.bt-can{background:#fee2e2;color:#991b1b}.bt-can:hover{background:#fecaca}
+.bt-view{background:#eff6ff;color:var(--accent)}.bt-view:hover{background:#dbeafe}
+.empty-st{padding:48px 24px;text-align:center;color:var(--slate)}
+.empty-st .ic{font-size:40px;margin-bottom:12px}
+.empty-st h4{font-size:16px;font-weight:700;color:#334155;margin-bottom:6px}
+.act-log{padding:16px 24px}
+.act-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.act-item:last-child{border-bottom:none}
+.act-time{color:var(--slate);white-space:nowrap;font-variant-numeric:tabular-nums;min-width:38px}
+.ws-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;margin-right:4px;transition:background .4s}
+.ws-dot.on{background:var(--green);box-shadow:0 0 6px rgba(16,185,129,.5)}
+.msg-stack{padding:0 28px}
+@media(max-width:1100px){.stats-row{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr;text-align:center}.hero-token{font-size:52px}.hero-actions{flex-direction:row;justify-content:center}}
+@media(max-width:768px){:root{--sw:0px}.sidebar{display:none}.main{margin-left:0}.stats-row{grid-template-columns:1fr 1fr}.content{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-mark">Queue Management</div>
+    <div class="sb-name">Queue<span>Cure</span></div>
+  </div>
+  <div class="nav-lbl">Operations</div>
+  <a href="{% url 'dashboard' %}" class="nav-a active"><span class="ic">🏠</span> Dashboard</a>
+  <a href="{% url 'add_patient' %}" class="nav-a"><span class="ic">➕</span> Register Patient</a>
+  <a href="{% url 'served_patients' %}" class="nav-a"><span class="ic">✅</span> Served Patients</a>
+  <div class="nav-lbl">Insights</div>
+  <a href="{% url 'statistics_dashboard' %}" class="nav-a"><span class="ic">📊</span> Analytics</a>
+  <a href="{% url 'audit_log' %}" class="nav-a"><span class="ic">📋</span> Audit Log</a>
+  <div class="nav-lbl">System</div>
+  <a href="{% url 'queue_settings' %}" class="nav-a"><span class="ic">⚙️</span> Settings</a>
+  <div class="sb-foot">
+    <a href="{% url 'logout' %}" class="nav-a"><span class="ic">🚪</span> Logout</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="pg-title">Reception Dashboard</div>
+      <div style="font-size:12px;color:#64748b"><span class="ws-dot" id="wsDot"></span> Live</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      {% if queue_active %}<span class="q-badge on"><span class="q-dot"></span> Queue Active</span>
+      {% else %}<span class="q-badge off">⏸ Queue Paused</span>{% endif %}
+      <span style="font-size:13px;color:#64748b">{{ request.user.get_full_name|default:request.user.username }}</span>
+    </div>
+  </div>
+
+  {% if messages %}
+  <div class="msg-stack mt-3">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if emergency_count > 0 %}
+  <div style="padding:0 28px;margin-top:16px">
+    <div class="em-bar">
+      <span style="font-size:20px">🚨</span>
+      <strong>{{ emergency_count }} EMERGENCY patient{{ emergency_count|pluralize }} in queue — prioritised to top.</strong>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="hero">
+      {% if serving %}
+      <div>
+        <div class="hero-lbl">Now Serving</div>
+        <div class="hero-token" id="heroToken">#{{ serving.token_number }}</div>
+      </div>
+      <div>
+        <div class="hero-lbl">Patient</div>
+        <div class="hero-name">{{ serving.name }}</div>
+        <div class="hero-type">{{ serving.consultation_type }} &nbsp;·&nbsp;
+          <span class="pbadge {% if serving.priority == 'emergency' %}pe{% elif serving.priority == 'urgent' %}pu{% else %}pn{% endif %}">{{ serving.priority }}</span>
+        </div>
+        <div style="margin-top:10px;font-size:13px;opacity:.75">Called {{ serving.called_at|time:"H:i" }} &nbsp;·&nbsp; Age {{ serving.age }}</div>
+      </div>
+      <div class="hero-actions">
+        <a href="{% url 'call_next' %}" class="btn-call">▶ Call Next Patient</a>
+        <a href="{% url 'complete_patient' serving.id %}" class="btn-sm" style="background:rgba(255,255,255,.2);color:#fff;text-align:center">✅ Mark Complete</a>
+      </div>
+      {% else %}
+      <div class="hero-empty">
+        <div style="font-size:36px;margin-bottom:8px">🏥</div>
+        <div style="font-size:16px;font-weight:600">No active consultation</div>
+        <div style="margin-top:6px;font-size:14px;opacity:.7">{{ waiting_count }} patient{{ waiting_count|pluralize }} waiting</div>
+        {% if waiting_count > 0 %}
+        <div style="margin-top:16px"><a href="{% url 'call_next' %}" class="btn-call">▶ Call First Patient</a></div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon si-amber">⏳</div><div><div class="stat-val" id="waitingCount">{{ waiting_count }}</div><div class="stat-lbl">Waiting</div></div></div>
+      <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val">{{ served_count }}</div><div class="stat-lbl">Served Today</div></div></div>
+      <div class="stat-card"><div class="stat-icon si-blue">⏱</div><div><div class="stat-val">{{ avg_time }}<span style="font-size:16px;font-weight:500">m</span></div><div class="stat-lbl">Avg Consult</div></div></div>
+      <div class="stat-card"><div class="stat-icon si-red">📋</div><div><div class="stat-val">{{ total_today }}</div><div class="stat-lbl">Total Today</div></div></div>
+    </div>
+
+    <!-- Queue table -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">⏳ Waiting Queue ({{ waiting_count }})</div>
+        <a href="{% url 'add_patient' %}" class="btn-sm btn-add">+ Register Patient</a>
+      </div>
+      <div class="act-bar">
+        {% if queue_active %}
+        <a href="{% url 'pause_queue' %}" class="btn-sm btn-pause">⏸ Pause Queue</a>
+        {% else %}
+        <a href="{% url 'resume_queue' %}" class="btn-sm btn-resume">▶ Resume Queue</a>
+        {% endif %}
+        <a href="{% url 'call_next' %}" class="btn-sm btn-add">📣 Call Next</a>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead><tr><th>Token</th><th>Name</th><th>Age</th><th>Consultation</th><th>Priority</th><th>ETA</th><th>Actions</th></tr></thead>
+          <tbody id="queueBody">
+            {% for entry in waiting_with_eta %}{% with p=entry.patient %}
+            <tr>
+              <td><span class="tok">#{{ p.token_number }}</span></td>
+              <td><div style="font-weight:600">{{ p.name }}</div><div style="font-size:12px;color:#64748b">{{ p.phone_number }}</div></td>
+              <td>{{ p.age }}</td>
+              <td>{{ p.consultation_type }}</td>
+              <td><span class="pbadge {% if p.priority == 'emergency' %}pe{% elif p.priority == 'urgent' %}pu{% else %}pn{% endif %}">{{ p.priority }}</span></td>
+              <td><span class="eta-chip">~{{ entry.eta }}m</span></td>
+              <td>
+                <div class="row-acts">
+                  <a href="{% url 'complete_patient' p.id %}" class="btn-t bt-done">✓ Done</a>
+                  <a href="{% url 'skip_patient' p.id %}" class="btn-t bt-skip">⏭</a>
+                  <a href="{% url 'cancel_patient' p.id %}" class="btn-t bt-can">✕</a>
+                  <a href="{% url 'patient_dashboard' p.token_number %}" class="btn-t bt-view" target="_blank">👁</a>
+                </div>
+              </td>
+            </tr>
+            {% endwith %}{% empty %}
+            <tr><td colspan="7">
+              <div class="empty-st"><div class="ic">🎉</div><h4>Queue is clear</h4><p style="font-size:13px">All patients have been attended to.</p></div>
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if recent_actions %}
+      <div style="border-top:1px solid #f1f5f9">
+        <div class="panel-head"><div class="panel-title" style="font-size:13px">Recent Activity</div></div>
+        <div class="act-log">
+          {% for log in recent_actions %}
+          <div class="act-item">
+            <span class="act-time">{{ log.timestamp|time:"H:i" }}</span>
+            <span>{{ log.description }}</span>
+            {% if log.performed_by %}<span style="color:#94a3b8;font-size:12px">· {{ log.performed_by.username }}</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+  const dot = document.getElementById('wsDot');
+  const proto = location.protocol==='https:'?'wss:':'ws:';
+  let socket, timer;
+  function connect(){
+    socket = new WebSocket(proto+'//'+location.host+'/ws/queue/');
+    socket.onopen = ()=>{ dot.classList.add('on'); };
+    socket.onclose = ()=>{ dot.classList.remove('on'); clearTimeout(timer); timer=setTimeout(connect,4000); };
+    socket.onmessage = (e)=>{
+      const {event, payload} = JSON.parse(e.data);
+      if(payload && payload.waiting_count!==undefined){
+        const el=document.getElementById('waitingCount');
+        if(el) el.textContent=payload.waiting_count;
+      }
+      if(event==='emergency_alert'){
+        showToast('🚨 EMERGENCY: '+payload.message,'danger');
+      }
+      const reload=['patient_called','consultation_completed','patient_registered','patient_cancelled','queue_paused','queue_resumed'];
+      if(reload.includes(event)){ showToast('Queue updated — refreshing…','info',1200); setTimeout(()=>location.reload(),1400); }
+    };
+  }
+  function showToast(msg,type,dur=4000){
+    const t=document.createElement('div');
+    t.className=`alert alert-${type} position-fixed shadow`;
+    t.style.cssText='top:16px;right:16px;z-index:9999;min-width:280px;';
+    t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),dur);
+  }
+  connect();
+})();
+</script>
+</body>
+</html>

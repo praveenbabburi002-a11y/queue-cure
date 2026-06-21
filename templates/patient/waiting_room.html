@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Token #{{ patient.token_number }} — Queue Cure</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:linear-gradient(160deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);min-height:100vh;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.wrap{width:100%;max-width:480px}
+.clinic-lbl{text-align:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:16px}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:24px;overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.token-hero{padding:32px 28px 24px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)}
+.t-lbl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px}
+.t-num{font-family:'JetBrains Mono',monospace;font-size:96px;font-weight:700;line-height:1;color:#93c5fd;text-shadow:0 0 40px rgba(147,197,253,.3)}
+.t-name{font-size:18px;font-weight:600;margin-top:8px;color:rgba(255,255,255,.85)}
+.ptag{display:inline-block;margin-top:8px;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.tag-e{background:rgba(239,68,68,.25);border:1px solid rgba(239,68,68,.5);color:#fca5a5}
+.tag-u{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:#fcd34d}
+.tag-n{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6)}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+.info-cell{padding:20px 12px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
+.info-cell:last-child{border-right:none}
+.i-val{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px}
+.i-val.g{color:#6ee7b7}.i-val.a{color:#fcd34d}
+.i-lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.ns-bar{padding:14px 24px;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between}
+.ns-lbl{font-size:12px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.ns-tok{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#60a5fa}
+.st-msg{padding:16px 24px;border-top:1px solid rgba(255,255,255,.08);text-align:center;font-size:14px;color:rgba(255,255,255,.6);line-height:1.5}
+.st-msg.your-turn{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#6ee7b7;font-weight:700;font-size:16px}
+.st-msg.done{background:rgba(100,116,139,.1);color:rgba(255,255,255,.4)}
+.tl{padding:18px 24px 24px;border-top:1px solid rgba(255,255,255,.08)}
+.tl-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:12px}
+.tl-bg{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+.tl-fill{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:3px;transition:width 1s ease}
+.live-ind{text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;gap:6px}
+.live-d{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .4s}
+.live-d.on{background:#10b981;box-shadow:0 0 8px rgba(16,185,129,.6);animation:pg 2s infinite}
+@keyframes pg{0%,100%{box-shadow:0 0 4px rgba(16,185,129,.4)}50%{box-shadow:0 0 12px rgba(16,185,129,.8)}}
+@media(max-width:480px){.t-num{font-size:72px}.i-val{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="clinic-lbl">Queue Cure — Live Status</div>
+  <div class="card">
+    <div class="token-hero">
+      <div class="t-lbl">Your Token</div>
+      <div class="t-num">{{ patient.token_number }}</div>
+      <div class="t-name">{{ patient.name }}</div>
+      <span class="ptag {% if patient.priority == 'emergency' %}tag-e{% elif patient.priority == 'urgent' %}tag-u{% else %}tag-n{% endif %}">{{ patient.priority }}</span>
+    </div>
+
+    {% if patient.status == 'waiting' %}
+    <div class="info-grid">
+      <div class="info-cell"><div class="i-val a" id="dAhead">{{ ahead|default:"0" }}</div><div class="i-lbl">Ahead</div></div>
+      <div class="info-cell"><div class="i-val" id="dPos">{{ position|default:"1" }}</div><div class="i-lbl">Position</div></div>
+      <div class="info-cell"><div class="i-val g" id="dEta">{{ eta|default:"—" }}</div><div class="i-lbl">Est. Mins</div></div>
+    </div>
+    {% endif %}
+
+    <div class="ns-bar">
+      <div class="ns-lbl">Now Serving</div>
+      <div class="ns-tok" id="curTok">{% if current_token %}#{{ current_token.token_number }}{% else %}—{% endif %}</div>
+    </div>
+
+    <div class="st-msg {% if patient.status == 'serving' %}your-turn{% elif patient.status == 'completed' or patient.status == 'cancelled' %}done{% endif %}" id="stMsg">
+      {% if patient.status == 'waiting' %}
+        {% if ahead == 0 %}🔔 You're next! Please proceed to the consultation room.
+        {% elif ahead == 1 %}Almost there — only 1 patient ahead of you.
+        {% else %}Please wait comfortably. We'll update you in real time.{% endif %}
+      {% elif patient.status == 'serving' %}🟢 It's your turn — please proceed to the doctor now.
+      {% elif patient.status == 'completed' %}✅ Your consultation is complete. Thank you for visiting!
+      {% elif patient.status == 'cancelled' %}Your token has been cancelled. Please contact reception if needed.
+      {% else %}Please check with the receptionist for your status.{% endif %}
+    </div>
+
+    {% if patient.status == 'waiting' and position %}
+    <div class="tl">
+      <div class="tl-lbl">Queue Progress</div>
+      <div class="tl-bg"><div class="tl-fill" id="progBar" style="width:10%"></div></div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="live-ind"><div class="live-d" id="liveD"></div><span id="liveTxt">Connecting…</span></div>
+</div>
+
+<script>
+(function(){
+  const TOKEN = {{ token_json }};
+  const dot=document.getElementById('liveD'),txt=document.getElementById('liveTxt');
+  const elAhead=document.getElementById('dAhead'),elPos=document.getElementById('dPos'),elEta=document.getElementById('dEta');
+  const elCur=document.getElementById('curTok'),elProg=document.getElementById('progBar');
+  let socket,timer;
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+
+  function connect(){
+    socket=new WebSocket(proto+'//'+location.host+'/ws/queue/');
+    socket.onopen=()=>{ dot.classList.add('on'); txt.textContent='Live updates active'; };
+    socket.onclose=()=>{ dot.classList.remove('on'); txt.textContent='Reconnecting…'; clearTimeout(timer); timer=setTimeout(connect,4000); };
+    socket.onmessage=(e)=>{
+      const {event,payload}=JSON.parse(e.data);
+      if(payload&&payload.current_token!==undefined&&elCur) elCur.textContent=payload.current_token?'#'+payload.current_token:'—';
+      const refresh=['patient_called','consultation_completed','patient_registered','patient_cancelled'];
+      if(refresh.includes(event)) refreshStatus();
+    };
+  }
+
+  async function refreshStatus(){
+    try{
+      const r=await fetch('/api/patient/'+TOKEN+'/status/');
+      if(!r.ok) return;
+      const d=await r.json();
+      if(d.status==='serving'||d.status==='completed'||d.status==='cancelled'){ location.reload(); return; }
+      if(elAhead) elAhead.textContent=d.ahead??'—';
+      if(elPos)   elPos.textContent=d.position??'—';
+      if(elEta)   elEta.textContent=d.eta??'—';
+      if(elCur)   elCur.textContent=d.current_token?'#'+d.current_token:'—';
+      if(elProg&&d.ahead!==undefined){
+        const total=Math.max(d.ahead+1,1);
+        elProg.style.width=Math.max(5,Math.round((1-d.ahead/total)*100))+'%';
+      }
+    }catch(e){ console.warn('Refresh failed',e); }
+  }
+
+  connect();
+  setInterval(refreshStatus, 30000);
+})();
+</script>
+</body>
+</html>

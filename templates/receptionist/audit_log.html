@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Log — Queue Cure</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0d1b2a;--accent:#2563eb;--bg:#f0f4f8;--slate:#64748b;--cr:16px;--sh:0 4px 24px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg)}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--navy);color:#fff;padding:24px 0;position:fixed;top:0;bottom:0;left:0}
+.sb-brand{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.sb-name{font-size:20px;font-weight:800;color:#fff}.sb-name span{color:#60a5fa}
+.nav-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:14px 20px 6px}
+.nav-a{display:flex;align-items:center;gap:10px;padding:10px 20px;margin:1px 8px;border-radius:10px;color:rgba(255,255,255,.6);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s}
+.nav-a:hover,.nav-a.active{background:rgba(255,255,255,.08);color:#fff}
+.ic{font-size:16px;width:20px;text-align:center}
+.main{margin-left:240px;flex:1;padding:28px}
+.pg-title{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:24px}
+.tbl-card{background:#fff;border-radius:var(--cr);box-shadow:var(--sh);overflow:hidden}
+.tbl-head{padding:18px 24px;border-bottom:1px solid #f1f5f9}
+.tbl-title{font-size:15px;font-weight:700;color:var(--navy)}
+table{width:100%;border-collapse:collapse}
+thead tr{background:#f8fafc}
+th{padding:10px 16px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--slate);text-align:left;border-bottom:1px solid #e2e8f0}
+td{padding:10px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.act-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569}
+</style>
+</head>
+<body>
+<div class="layout">
+<div class="sidebar">
+  <div class="sb-brand"><div class="sb-name">Queue<span>Cure</span></div></div>
+  <div class="nav-lbl">Operations</div>
+  <a href="{% url 'dashboard' %}" class="nav-a"><span class="ic">🏠</span> Dashboard</a>
+  <a href="{% url 'add_patient' %}" class="nav-a"><span class="ic">➕</span> Register Patient</a>
+  <a href="{% url 'served_patients' %}" class="nav-a"><span class="ic">✅</span> Served Patients</a>
+  <div class="nav-lbl">Insights</div>
+  <a href="{% url 'statistics_dashboard' %}" class="nav-a"><span class="ic">📊</span> Analytics</a>
+  <a href="{% url 'audit_log' %}" class="nav-a active"><span class="ic">📋</span> Audit Log</a>
+  <div class="nav-lbl">System</div>
+  <a href="{% url 'queue_settings' %}" class="nav-a"><span class="ic">⚙️</span> Settings</a>
+  <a href="{% url 'logout' %}" class="nav-a"><span class="ic">🚪</span> Logout</a>
+</div>
+<div class="main">
+  <div class="pg-title">📋 Audit Log</div>
+  <div class="tbl-card">
+    <div class="tbl-head"><div class="tbl-title">Last 200 Actions</div></div>
+    <div class="table-responsive">
+      <table>
+        <thead><tr><th>Time</th><th>Action</th><th>Description</th><th>Patient</th><th>By</th></tr></thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td style="white-space:nowrap;color:#64748b">{{ log.timestamp|date:"d M H:i" }}</td>
+            <td><span class="act-badge">{{ log.get_action_display }}</span></td>
+            <td>{{ log.description }}</td>
+            <td>{% if log.patient %}#{{ log.patient.token_number }}{% else %}—{% endif %}</td>
+            <td>{{ log.performed_by.username|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" style="text-align:center;padding:32px;color:#94a3b8">No actions logged yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>
